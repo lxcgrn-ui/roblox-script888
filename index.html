@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HVXZ Script Hub</title>
+    <style>
+        :root {
+            --neon-color: #00ffcc;
+            --bg-color: #0d0d0d;
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --glass-border: rgba(0, 255, 204, 0.3);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 粒子背景 Canvas */
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 玻璃質感與發光特效 */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.2), inset 0 0 10px rgba(0, 255, 204, 0.1);
+            padding: 40px;
+            text-align: center;
+            z-index: 10;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        /* 緩慢晃動 (飄浮) 動畫 */
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* 登入視窗 */
+        #login-container {
+            width: 300px;
+            opacity: 1;
+        }
+
+        #login-container h2 {
+            margin-top: 0;
+            color: var(--neon-color);
+            text-shadow: 0 0 10px var(--neon-color);
+        }
+
+        input[type="password"] {
+            width: 80%;
+            padding: 10px;
+            margin: 20px 0;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            outline: none;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        input[type="password"]:focus {
+            box-shadow: 0 0 10px var(--neon-color);
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: var(--neon-color);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
+        }
+
+        /* 主要腳本容器 */
+        #main-container {
+            display: none;
+            opacity: 0;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            z-index: 10;
+        }
+
+        .script-card {
+            width: 200px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .script-card h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 為不同卡片設定不同的動畫延遲，讓飄浮更有層次 */
+        .delay-1 { animation-delay: 0s; }
+        .delay-2 { animation-delay: 0.5s; }
+        .delay-3 { animation-delay: 1s; }
+        .delay-4 { animation-delay: 1.5s; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="particles-canvas"></canvas>
+
+    <div id="login-container" class="glass-panel floating">
+        <h2>System Access</h2>
+        <input type="password" id="key-input" placeholder="Enter Key...">
+        <br>
+        <button onclick="checkKey()">Verify</button>
+    </div>
+
+    <div id="main-container">
+        <div class="glass-panel floating script-card delay-1">
+            <h3>voidware</h3>
+            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest.lua\', true))()', this)">Copy Script</button>
+        </div>
+
+        <div class="glass-panel floating script-card delay-2">
+            <h3>rivals</h3>
+            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/akkteste2026-boop/lua/refs/heads/main/NEW%20UPDATE\'))()', this)">Copy Script</button>
+        </div>
+
+        <div class="glass-panel floating script-card delay-3">
+            <h3>infinite yied 6.4</h3>
+            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source\'))()', this)">Copy Script</button>
+        </div>
+
+        <div class="glass-panel floating script-card delay-4">
+            <h3>wall hop</h3>
+            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script\'))()', this)">Copy Script</button>
+        </div>
+    </div>
+
+    <script>
+        // === Key 驗證與淡出入邏輯 ===
+        function checkKey() {
+            const keyInput = document.getElementById('key-input').value;
+            const loginContainer = document.getElementById('login-container');
+            const mainContainer = document.getElementById('main-container');
+
+            if (keyInput === '181818') {
+                // 淡出登入視窗
+                loginContainer.style.opacity = '0';
+                
+                setTimeout(() => {
+                    loginContainer.style.display = 'none';
+                    // 準備淡入主視窗
+                    mainContainer.style.display = 'grid';
+                    // 稍微延遲以確保 display: grid 已生效再改變透明度
+                    setTimeout(() => {
+                        mainContainer.style.opacity = '1';
+                    }, 50);
+                }, 800); // 配合 CSS 的 transition 時間
+            } else {
+                alert('Invalid Key! Please try again.');
+            }
+        }
+
+        // 支援按下 Enter 鍵登入
+        document.getElementById('key-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkKey();
+        });
+
+        // === 複製腳本邏輯 ===
+        function copyScript(scriptText, buttonElement) {
+            navigator.clipboard.writeText(scriptText).then(() => {
+                const originalText = buttonElement.innerText;
+                buttonElement.innerText = 'Copied!';
+                buttonElement.style.background = '#fff';
+                
+                setTimeout(() => {
+                    buttonElement.innerText = originalText;
+                    buttonElement.style.background = 'var(--neon-color)';
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        // === 簡單粒子背景效果 ===
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = 'rgba(0, 255, 204, ' + (Math.random() * 0.5 + 0.1) + ')';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.width * canvas.height) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+    </script>
+</body>
+</html>
