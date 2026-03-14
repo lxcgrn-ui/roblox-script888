@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HVXZ Script Hub</title>
+    <title>HVXZ Script Hub - Light Edition</title>
     <style>
         :root {
-            --neon-color: #00ffcc;
-            --bg-color: #0d0d0d;
-            --glass-bg: rgba(20, 20, 20, 0.6);
-            --glass-border: rgba(0, 255, 204, 0.3);
+            --primary-accent: #007bff; /* 專業的藍色調 */
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.1);
         }
 
         body, html {
@@ -18,15 +20,15 @@
             width: 100%;
             height: 100%;
             background-color: var(--bg-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
-            color: white;
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* 粒子背景 Canvas */
+        /* 粒子背景 (深色點點) */
         #particles-canvas {
             position: absolute;
             top: 0;
@@ -37,106 +39,117 @@
             pointer-events: none;
         }
 
-        /* 玻璃質感與發光特效 */
+        /* 玻璃質感視窗 */
         .glass-panel {
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            box-shadow: 0 0 25px rgba(0, 255, 204, 0.2), inset 0 0 10px rgba(0, 255, 204, 0.1);
-            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px var(--shadow-color), 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 50px;
             text-align: center;
             z-index: 10;
-            transition: opacity 0.8s ease-in-out;
+            transition: opacity 0.6s ease, transform 0.6s ease;
         }
 
-        /* 緩慢晃動 (飄浮) 動畫 */
+        /* 緩慢晃動動畫 */
         .floating {
-            animation: float 4s ease-in-out infinite;
+            animation: float 5s ease-in-out infinite;
         }
 
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
         }
 
-        /* 登入視窗 */
+        /* 登入視窗 - 加大版 */
         #login-container {
-            width: 300px;
+            width: 400px;
             opacity: 1;
         }
 
         #login-container h2 {
             margin-top: 0;
-            color: var(--neon-color);
-            text-shadow: 0 0 10px var(--neon-color);
+            font-size: 2rem;
+            color: var(--primary-accent);
         }
 
         input[type="password"] {
-            width: 80%;
-            padding: 10px;
-            margin: 20px 0;
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
+            width: 85%;
+            padding: 15px;
+            margin: 25px 0;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: white;
+            color: #333;
             outline: none;
             text-align: center;
-            font-size: 16px;
+            font-size: 18px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
 
         input[type="password"]:focus {
-            box-shadow: 0 0 10px var(--neon-color);
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
         }
 
         button {
-            padding: 10px 20px;
+            padding: 12px 30px;
             border: none;
-            border-radius: 8px;
-            background: var(--neon-color);
-            color: #000;
+            border-radius: 12px;
+            background: var(--primary-accent);
+            color: white;
             font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
         }
 
         button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+            filter: brightness(1.1);
         }
 
-        /* 主要腳本容器 */
+        /* 主腳本容器 - 橫向一列 */
         #main-container {
             display: none;
             opacity: 0;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
+            flex-direction: row; /* 排成一列 */
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
             z-index: 10;
+            width: 95%;
+            max-width: 1400px;
         }
 
+        /* 腳本卡片 - 加大版 */
         .script-card {
-            width: 200px;
-            padding: 25px;
+            flex: 1;
+            min-width: 250px;
+            max-width: 320px;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
+            height: 200px;
         }
 
         .script-card h3 {
             margin-top: 0;
-            font-size: 1.2rem;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+            color: #222;
         }
 
-        /* 為不同卡片設定不同的動畫延遲，讓飄浮更有層次 */
+        /* 動畫延遲 */
         .delay-1 { animation-delay: 0s; }
-        .delay-2 { animation-delay: 0.5s; }
-        .delay-3 { animation-delay: 1s; }
-        .delay-4 { animation-delay: 1.5s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.8s; }
+        .delay-4 { animation-delay: 1.2s; }
 
     </style>
 </head>
@@ -145,101 +158,92 @@
     <canvas id="particles-canvas"></canvas>
 
     <div id="login-container" class="glass-panel floating">
-        <h2>System Access</h2>
-        <input type="password" id="key-input" placeholder="Enter Key...">
+        <h2>System Login</h2>
+        <input type="password" id="key-input" placeholder="Enter License Key">
         <br>
-        <button onclick="checkKey()">Verify</button>
+        <button onclick="checkKey()">Access Hub</button>
     </div>
 
     <div id="main-container">
         <div class="glass-panel floating script-card delay-1">
             <h3>voidware</h3>
-            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest.lua\', true))()', this)">Copy Script</button>
+            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest.lua\', true))()', this)">Copy Code</button>
         </div>
 
         <div class="glass-panel floating script-card delay-2">
             <h3>rivals</h3>
-            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/akkteste2026-boop/lua/refs/heads/main/NEW%20UPDATE\'))()', this)">Copy Script</button>
+            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/akkteste2026-boop/lua/refs/heads/main/NEW%20UPDATE\'))()', this)">Copy Code</button>
         </div>
 
         <div class="glass-panel floating script-card delay-3">
             <h3>infinite yied 6.4</h3>
-            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source\'))()', this)">Copy Script</button>
+            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source\'))()', this)">Copy Code</button>
         </div>
 
         <div class="glass-panel floating script-card delay-4">
             <h3>wall hop</h3>
-            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script\'))()', this)">Copy Script</button>
+            <button onclick="copyScript('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script\'))()', this)">Copy Code</button>
         </div>
     </div>
 
     <script>
-        // === Key 驗證與淡出入邏輯 ===
+        // 驗證邏輯 
         function checkKey() {
-            const keyInput = document.getElementById('key-input').value;
-            const loginContainer = document.getElementById('login-container');
-            const mainContainer = document.getElementById('main-container');
+            const val = document.getElementById('key-input').value;
+            const login = document.getElementById('login-container');
+            const main = document.getElementById('main-container');
 
-            if (keyInput === '181818') {
-                // 淡出登入視窗
-                loginContainer.style.opacity = '0';
+            if (val === '181818') {
+                login.style.opacity = '0';
+                login.style.transform = 'scale(0.9)';
                 
                 setTimeout(() => {
-                    loginContainer.style.display = 'none';
-                    // 準備淡入主視窗
-                    mainContainer.style.display = 'grid';
-                    // 稍微延遲以確保 display: grid 已生效再改變透明度
-                    setTimeout(() => {
-                        mainContainer.style.opacity = '1';
-                    }, 50);
-                }, 800); // 配合 CSS 的 transition 時間
+                    login.style.display = 'none';
+                    main.style.display = 'flex';
+                    setTimeout(() => { main.style.opacity = '1'; }, 50);
+                }, 600);
             } else {
-                alert('Invalid Key! Please try again.');
+                alert('Access Denied: Incorrect Key');
             }
         }
 
-        // 支援按下 Enter 鍵登入
-        document.getElementById('key-input').addEventListener('keypress', function(e) {
+        // 支援 Enter 鍵
+        document.getElementById('key-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') checkKey();
         });
 
-        // === 複製腳本邏輯 ===
-        function copyScript(scriptText, buttonElement) {
-            navigator.clipboard.writeText(scriptText).then(() => {
-                const originalText = buttonElement.innerText;
-                buttonElement.innerText = 'Copied!';
-                buttonElement.style.background = '#fff';
-                
+        // 複製功能 [cite: 2, 3, 4, 5]
+        function copyScript(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const oldText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.style.background = '#28a745';
                 setTimeout(() => {
-                    buttonElement.innerText = originalText;
-                    buttonElement.style.background = 'var(--neon-color)';
-                }, 1500);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
+                    btn.innerText = oldText;
+                    btn.style.background = 'var(--primary-accent)';
+                }, 2000);
             });
         }
 
-        // === 簡單粒子背景效果 ===
+        // 粒子背景邏輯
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d');
-        let particlesArray = [];
+        let particles = [];
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
+        function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-        });
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
         class Particle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedX = Math.random() * 1 - 0.5;
-                this.speedY = Math.random() * 1 - 0.5;
-                this.color = 'rgba(0, 255, 204, ' + (Math.random() * 0.5 + 0.1) + ')';
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 0.6 - 0.3;
+                this.speedY = Math.random() * 0.6 - 0.3;
             }
             update() {
                 this.x += this.speedX;
@@ -248,32 +252,24 @@
                 if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
             }
             draw() {
-                ctx.fillStyle = this.color;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
-        function initParticles() {
-            particlesArray = [];
-            let numberOfParticles = (canvas.width * canvas.height) / 9000;
-            for (let i = 0; i < numberOfParticles; i++) {
-                particlesArray.push(new Particle());
-            }
+        function init() {
+            for (let i = 0; i < 80; i++) particles.push(new Particle());
         }
 
-        function animateParticles() {
+        function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-            }
-            requestAnimationFrame(animateParticles);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
         }
-
-        initParticles();
-        animateParticles();
+        init();
+        animate();
     </script>
 </body>
 </html>
