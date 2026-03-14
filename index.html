@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HVXZ Script Hub V2 - Fixed</title>
+    <title>HVXZ Script Hub - Security Edition</title>
     <style>
         :root {
             /* 默認深色主題 */
             --bg-color: #050505;
-            --panel-bg: rgba(20, 20, 20, 0.8);
+            --panel-bg: rgba(15, 15, 15, 0.85);
             --text-color: #ffffff;
             --accent-glow: rgba(0, 255, 204, 0.5);
             --button-bg: #00ffcc;
             --button-text: #000000;
-            --cursor-color: rgba(0, 255, 204, 0.25);
+            --cursor-color: rgba(0, 255, 204, 0.2);
             --border-color: rgba(0, 255, 204, 0.3);
+            --error-color: #ff4d4d;
         }
 
         [data-theme="light"] {
             /* 淺色主題 */
             --bg-color: #ffffff;
-            --panel-bg: rgba(245, 245, 245, 0.85);
+            --panel-bg: rgba(245, 245, 245, 0.9);
             --text-color: #1a1a1a;
             --accent-glow: rgba(0, 123, 255, 0.4);
             --button-bg: #007bff;
             --button-text: #ffffff;
-            --cursor-color: rgba(0, 123, 255, 0.2);
+            --cursor-color: rgba(0, 123, 255, 0.15);
             --border-color: rgba(0, 123, 255, 0.2);
         }
 
@@ -41,14 +42,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: background-color 0.5s ease, color 0.5s ease;
+            transition: background-color 0.5s ease;
         }
 
-        /* 延遲跟隨暈光 */
+        /* 物理延遲游標 */
         #cursor-glow {
             position: fixed;
-            width: 500px;
-            height: 500px;
+            width: 600px;
+            height: 600px;
             background: radial-gradient(circle, var(--cursor-color) 0%, rgba(0,0,0,0) 70%);
             border-radius: 50%;
             pointer-events: none;
@@ -57,22 +58,18 @@
             will-change: left, top;
         }
 
-        /* 粒子背景 */
         #particles-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 0;
             opacity: 0.3;
         }
 
-        /* 右上角切換器 */
+        /* 右上角切換按鈕 */
         #theme-toggle {
             position: fixed;
-            top: 25px;
-            right: 25px;
+            top: 25px; right: 25px;
             z-index: 100;
             background: var(--panel-bg);
             border: 2px solid var(--border-color);
@@ -80,95 +77,112 @@
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 15px var(--accent-glow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.3s;
             display: flex;
-            align-items: center;
-            justify-content: center;
         }
-
-        #theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
-
+        #theme-toggle:hover { transform: scale(1.1); }
         .icon { width: 28px; height: 28px; fill: var(--text-color); }
 
         /* 玻璃面板 */
         .glass-panel {
             background: var(--panel-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: 30px;
-            box-shadow: 0 0 35px var(--accent-glow);
-            padding: 50px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 2px solid var(--border-color);
+            border-radius: 35px;
+            box-shadow: 0 0 40px var(--accent-glow);
+            padding: 60px;
             text-align: center;
             z-index: 10;
-            transition: opacity 0.6s ease, transform 0.6s ease;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
         }
 
-        .floating { animation: smoothFloat 6s ease-in-out infinite; }
-        @keyframes smoothFloat {
+        .floating { animation: float 6s ease-in-out infinite; }
+        @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-20px); }
         }
 
-        /* 登入區 */
-        #login-container { width: 420px; }
-        #login-container h2 { font-size: 2rem; margin-bottom: 25px; letter-spacing: 2px; }
+        /* 錯誤晃動動畫 */
+        .shake {
+            animation: shake 0.15s ease-in-out infinite;
+            border-color: var(--error-color) !important;
+            box-shadow: 0 0 50px var(--error-color) !important;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-15px); }
+            75% { transform: translateX(15px); }
+        }
 
+        /* 登入內容控管 */
+        #login-content.hidden { display: none; }
+        
+        #error-display {
+            display: none;
+            font-size: 8rem;
+            color: var(--error-color);
+            font-weight: bold;
+            line-height: 1;
+        }
+        #error-display.active { display: block; }
+
+        /* 登入元素樣式 */
+        #login-container { width: 450px; }
+        h2 { font-size: 2.2rem; margin-bottom: 30px; letter-spacing: 2px; }
         input[type="password"] {
             width: 85%;
-            padding: 15px;
-            margin-bottom: 25px;
+            padding: 18px;
+            margin-bottom: 30px;
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 15px;
             background: rgba(128, 128, 128, 0.1);
             color: var(--text-color);
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             outline: none;
         }
-
         .btn {
-            padding: 12px 40px;
+            padding: 15px 50px;
             border: none;
-            border-radius: 12px;
+            border-radius: 15px;
             background: var(--button-bg);
             color: var(--button-text);
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             cursor: pointer;
-            box-shadow: 0 4px 15px var(--accent-glow);
+            box-shadow: 0 5px 20px var(--accent-glow);
             transition: 0.3s;
         }
+        .btn:hover { transform: translateY(-4px); box-shadow: 0 10px 30px var(--accent-glow); }
 
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px var(--accent-glow); }
-
-        /* 主選單排成一列 */
+        /* 主選單排列 */
         #main-container {
             display: none;
             opacity: 0;
             flex-direction: row;
-            gap: 25px;
+            gap: 30px;
             width: 95%;
             justify-content: center;
         }
-
         .script-card {
             flex: 1;
-            min-width: 260px;
-            max-width: 320px;
-            height: 240px;
+            min-width: 280px;
+            max-width: 350px;
+            height: 260px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
+        .script-card h3 { font-size: 1.6rem; margin-bottom: 35px; }
 
-        .script-card h3 { font-size: 1.5rem; margin-bottom: 30px; }
-
+        /* 延遲動畫 */
         .delay-1 { animation-delay: 0s; }
-        .delay-2 { animation-delay: 0.4s; }
-        .delay-3 { animation-delay: 0.8s; }
-        .delay-4 { animation-delay: 1.2s; }
+        .delay-2 { animation-delay: 0.5s; }
+        .delay-3 { animation-delay: 1s; }
+        .delay-4 { animation-delay: 1.5s; }
 
     </style>
 </head>
@@ -184,37 +198,40 @@
     </div>
 
     <div id="login-container" class="glass-panel floating">
-        <h2>HUB ACCESS</h2>
-        <input type="password" id="key-input" placeholder="Enter Key...">
-        <br>
-        <button class="btn" onclick="checkKey()">LOGIN</button>
+        <div id="login-content">
+            <h2>ACCESS KEY</h2>
+            <input type="password" id="key-input" placeholder="••••••••">
+            <br>
+            <button class="btn" onclick="checkKey()">VERIFY</button>
+        </div>
+        <div id="error-display">X</div>
     </div>
 
     <div id="main-container">
         <div class="glass-panel floating script-card delay-1">
             <h3>voidware</h3>
-            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest.lua\', true))()', this)">Copy</button>
+            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest.lua\', true))()', this)">Copy Code</button>
         </div>
         <div class="glass-panel floating script-card delay-2">
             <h3>rivals</h3>
-            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/akkteste2026-boop/lua/refs/heads/main/NEW%20UPDATE\'))()', this)">Copy</button>
+            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/akkteste2026-boop/lua/refs/heads/main/NEW%20UPDATE\'))()', this)">Copy Code</button>
         </div>
         <div class="glass-panel floating script-card delay-3">
             <h3>infinite yied 6.4</h3>
-            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source\'))()', this)">Copy</button>
+            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source\'))()', this)">Copy Code</button>
         </div>
         <div class="glass-panel floating script-card delay-4">
             <h3>wall hop</h3>
-            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script\'))()', this)">Copy</button>
+            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/ScpGuest666/Random-Roblox-script/refs/heads/main/Roblox%20WallHop%20V4%20script\'))()', this)">Copy Code</button>
         </div>
     </div>
 
     <script>
-        // === 緩慢物理延遲游標 (LERP) ===
+        // === 緩慢物理延遲游標 ===
         const glow = document.getElementById('cursor-glow');
         let mX = window.innerWidth / 2, mY = window.innerHeight / 2;
         let bX = mX, bY = mY;
-        const speed = 0.04; // 延遲速度
+        const speed = 0.035; // 延遲感係數
 
         window.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
 
@@ -226,6 +243,45 @@
             requestAnimationFrame(updateCursor);
         }
         updateCursor();
+
+        // === 驗證邏輯與錯誤特效 ===
+        function checkKey() {
+            const input = document.getElementById('key-input');
+            const loginBox = document.getElementById('login-container');
+            const loginContent = document.getElementById('login-content');
+            const errorDisplay = document.getElementById('error-display');
+            const main = document.getElementById('main-container');
+
+            if (input.value === '181818') {
+                // 成功：淡出登入視窗
+                loginBox.style.opacity = '0';
+                loginBox.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    loginBox.style.display = 'none';
+                    main.style.display = 'flex';
+                    setTimeout(() => main.style.opacity = '1', 50);
+                }, 600);
+            } else {
+                // 失敗：顯示大 X 並左右晃動
+                loginContent.classList.add('hidden');
+                errorDisplay.classList.add('active');
+                loginBox.classList.add('shake');
+
+                // 等搖晃完後恢復
+                setTimeout(() => {
+                    loginBox.classList.remove('shake');
+                    errorDisplay.classList.remove('active');
+                    loginContent.classList.remove('hidden');
+                    input.value = ''; // 清空輸入
+                    input.focus();
+                }, 800); // 晃動持續時間
+            }
+        }
+
+        // 支援 Enter 鍵
+        document.getElementById('key-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkKey();
+        });
 
         // === 主題切換 ===
         function toggleTheme() {
@@ -242,27 +298,11 @@
             }
         }
 
-        // === 驗證與複製 ===
-        function checkKey() {
-            if (document.getElementById('key-input').value === '181818') {
-                const login = document.getElementById('login-container');
-                const main = document.getElementById('main-container');
-                login.style.opacity = '0';
-                login.style.transform = 'scale(0.9)';
-                setTimeout(() => {
-                    login.style.display = 'none';
-                    main.style.display = 'flex';
-                    setTimeout(() => main.style.opacity = '1', 50);
-                }, 600);
-            } else {
-                alert('Invalid Key!');
-            }
-        }
-
+        // === 複製功能 ===
         function copyCode(text, btn) {
             navigator.clipboard.writeText(text).then(() => {
                 const original = btn.innerText;
-                btn.innerText = 'COPIED!';
+                btn.innerText = 'COPIED';
                 btn.style.background = '#4cd137';
                 setTimeout(() => {
                     btn.innerText = original;
@@ -271,7 +311,7 @@
             });
         }
 
-        // === 粒子系統 ===
+        // === 粒子背景 ===
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -284,14 +324,12 @@
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.s = Math.random() * 2;
-                this.vX = Math.random() * 0.4 - 0.2;
-                this.vY = Math.random() * 0.4 - 0.2;
+                this.vX = Math.random() * 0.5 - 0.25;
+                this.vY = Math.random() * 0.5 - 0.25;
             }
             draw() {
                 ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-color');
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.s, 0, Math.PI * 2); ctx.fill();
             }
             update() {
                 this.x += this.vX; this.y += this.vY;
