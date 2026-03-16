@@ -30,6 +30,10 @@
             --border-color: rgba(0, 123, 255, 0.2);
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
@@ -93,7 +97,6 @@
             border: 2px solid var(--border-color);
             border-radius: 35px;
             box-shadow: 0 0 40px var(--accent-glow);
-            padding: 60px;
             text-align: center;
             z-index: 10;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -131,10 +134,13 @@
         #error-display.active { display: block; }
 
         /* 登入元素樣式 */
-        #login-container { width: 450px; }
+        #login-container { 
+            width: 450px; 
+            padding: 60px;
+        }
         h2 { font-size: 2.2rem; margin-bottom: 30px; letter-spacing: 2px; }
         input[type="password"] {
-            width: 85%;
+            width: 100%;
             padding: 18px;
             margin-bottom: 30px;
             border: 1px solid var(--border-color);
@@ -159,32 +165,38 @@
         }
         .btn:hover { transform: translateY(-4px); box-shadow: 0 10px 30px var(--accent-glow); }
 
-        /* 主選單排列 */
+        /* 主選單排列優化：支援自動換行、比例完美 */
         #main-container {
             display: none;
             opacity: 0;
             flex-direction: row;
-            gap: 30px;
-            width: 95%;
+            flex-wrap: wrap; /* 允許在螢幕變小時自動換行，防止擁擠 */
+            gap: 40px; /* 拉開視窗之間的距離 */
+            width: 90%;
+            max-width: 1400px;
             justify-content: center;
+            align-items: center;
         }
+
         .script-card {
             flex: 1;
-            min-width: 280px;
-            max-width: 350px;
+            min-width: 250px;
+            max-width: 300px; /* 控制最大寬度，使其看起來精緻 */
             height: 260px;
+            padding: 40px 20px; /* 專屬的內部邊距，不與登入視窗共用 */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
-        .script-card h3 { font-size: 1.6rem; margin-bottom: 35px; }
+
+        .script-card h3 { font-size: 1.6rem; margin-bottom: 35px; margin-top: 0; }
 
         /* 延遲動畫 */
         .delay-1 { animation-delay: 0s; }
-        .delay-2 { animation-delay: 0.5s; }
-        .delay-3 { animation-delay: 1s; }
-        .delay-4 { animation-delay: 1.5s; }
+        .delay-2 { animation-delay: 0.3s; }
+        .delay-3 { animation-delay: 0.6s; }
+        .delay-4 { animation-delay: 0.9s; }
 
     </style>
 </head>
@@ -227,7 +239,7 @@
         </div>
         <div class="glass-panel floating script-card delay-2">
             <h3>rivals</h3>
-            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/akkteste2026-boop/lua/refs/heads/main/NEW%20UPDATE\'))()', this)">Copy Code</button>
+            <button class="btn" onclick="copyCode('loadstring(game:HttpGet(\'https://raw.githubusercontent.com/EndOverdosing/Soluna-API/refs/heads/main/rivals-modern.lua\', true))()', this)">Copy Code</button>
         </div>
         <div class="glass-panel floating script-card delay-3">
             <h3>infinite yied 6.4</h3>
@@ -244,7 +256,7 @@
         const glow = document.getElementById('cursor-glow');
         let mX = window.innerWidth / 2, mY = window.innerHeight / 2;
         let bX = mX, bY = mY;
-        const speed = 0.035; // 延遲感係數
+        const speed = 0.035;
 
         window.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
 
@@ -265,9 +277,8 @@
             const errorDisplay = document.getElementById('error-display');
             const main = document.getElementById('main-container');
 
-            // 密碼已變更為 123456
-            if (input.value === '123456') {
-                // 成功：淡出登入視窗
+            // 密碼已更新為 hsshkvx
+            if (input.value === 'hsshkvx') {
                 loginBox.style.opacity = '0';
                 loginBox.style.transform = 'scale(0.8)';
                 setTimeout(() => {
@@ -276,19 +287,17 @@
                     setTimeout(() => main.style.opacity = '1', 50);
                 }, 600);
             } else {
-                // 失敗：顯示大 X 並左右晃動
                 loginContent.classList.add('hidden');
                 errorDisplay.classList.add('active');
                 loginBox.classList.add('shake');
 
-                // 等搖晃完後恢復
                 setTimeout(() => {
                     loginBox.classList.remove('shake');
                     errorDisplay.classList.remove('active');
                     loginContent.classList.remove('hidden');
-                    input.value = ''; // 清空輸入
+                    input.value = '';
                     input.focus();
-                }, 800); // 晃動持續時間
+                }, 800);
             }
         }
 
@@ -304,12 +313,10 @@
             const isDark = body.getAttribute('data-theme') === 'dark';
 
             if (isDark) {
-                // 切換至淺色
                 body.setAttribute('data-theme', 'light');
                 iconMoon.style.display = 'none';
                 iconSun.style.display = 'block';
             } else {
-                // 切換至深色
                 body.setAttribute('data-theme', 'dark');
                 iconMoon.style.display = 'block';
                 iconSun.style.display = 'none';
